@@ -1,0 +1,14 @@
+#set FLASK_APP=application.py
+#python application.py
+
+
+flask
+flask_session
+Werkzeug==0.16.0
+psycopg2
+sqlalchemy
+flask_sqlalchemy
+requests
+flask_socketio
+pandas
+requests

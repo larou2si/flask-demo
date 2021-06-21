@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Currency Converter
+{% endblock %}
+
+{% block body %}
+	
+	
+        <form id="form">
+            <input id="currency" autocomplete="off" autofocus placeholder="Currency" type="text">
+            <input type="submit" value="Get Exchange Rate">
+        </form>
+        <br>
+        <div id="result"></div>
+		
+	{% endblock %}	
