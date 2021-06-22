@@ -1,0 +1,11 @@
+<div class="timeline-item">
+    <div class="timeline-body">
+        <div class="embed-responsive embed-responsive-16by9">
+            <video width="320" height="240" controls>
+                {% if srcvideo %}
+                    <source src={{ url_for('static', filename= srcvideo ) }} type="video/mp4">
+                {% endif %}
+            </video>
+        </div>
+    </div>
+</div>

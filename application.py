@@ -1,54 +1,82 @@
 import pandas as pd
 import os
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, jsonify, render_template, request, session, redirect
+from werkzeug.utils import secure_filename
+
 from flask_session import Session
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-#app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:gogeo@localhost/pfe"
-#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-#db.init_app(app)
+# app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:gogeo@localhost/pfe"
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# db.init_app(app)
 
-#socketio = SocketIO(app)
+# socketio = SocketIO(app)
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config['UPLOAD_FOLDER'] = 'static/media/'
 Session(app)
-#
-## os.environ['DATABASE_URL'] = "postgres://postgres:root@localhost/projetML"
-## os.getenv("DATABASE_URL")
-##engine = create_engine("postgresql://postgres:gogeo@localhost/pfe")
-##db = scoped_session(sessionmaker(bind=engine))
-#
-#
+
+
 @app.route("/")
 def index():
-
     if request.method == "POST":
         filename = request.form.get("filename")
         return jsonify({"success": True, "df": session[filename].to_})
-    data = {
-            }
+    data = {}
     return render_template("mlground_index.html", data=data)
+
+
+@app.route("/videodetect", methods=["POST"])
+def videodetect():
+    if 'image' not in request.files:
+        print("No file selected")
+    else:
+        videoInput = request.files['image']
+        filename = secure_filename(videoInput.filename)
+        videoInput.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    imagesamples = request.form.get("imagesamples")
+    videosamples = request.form.get("videosamples")
+    print(videosamples, imagesamples)
+    return render_template("mlground_index.html", srcvideo='media/'+filename)
+    return render_template("play_video.html")
+    # url_for('static', filename='media/'+filename)
+# 'application/octet-stream'
+
+@app.route("/upload-image", methods=["GET", "POST"])
+def upload_image():
+    if request.method == "POST":
+
+        if request.files:
+            image = request.files["image"]
+            image.save(os.path.join(app.config["UPLOAD_FOLDER"], image.filename))
+            print(image)
+
+            return redirect(request.url)
+
+    return render_template("mlground_index.html")
+
+
 #
 #
 ## ============================ projet datascince: insurance===========================================
 #
-#@app.route("/police0")
-#def police0():
+# @app.route("/police0")
+# def police0():
 #    return render_template("view_police.html")
 #
 #
-#@app.route("/police1", methods=["GET"])
-#def police1():
+# @app.route("/police1", methods=["GET"])
+# def police1():
 #    #  return jsonify({"success": False})
 #    return jsonify({"success": True, "rate": "POLICE"})
 #
 #    # Predict: saisir le form pour calculer
 #
 #
-#@app.route("/mlform", methods=["GET", "POST"])
-#def mlform():
+# @app.route("/mlform", methods=["GET", "POST"])
+# def mlform():
 #    carmodels = CarModel.query.all()
 #    puisances = Puissance.query.all()
 #    usages = CarUsage.query.all()
@@ -56,8 +84,8 @@ def index():
 #                           usages=usages)
 #
 #
-#@app.route("/carform", methods=["POST"])
-#def carform():
+# @app.route("/carform", methods=["POST"])
+# def carform():
 #    model = request.form.get("model_id")
 #    energie = request.form.get("energie_id")
 #    puissance = request.form.get("puisance_id")
@@ -79,8 +107,8 @@ def index():
 #
 #
 ## ============================ end projet datascince: insurance===========================================
-#@app.route("/book", methods=["POST"])
-#def book():
+# @app.route("/book", methods=["POST"])
+# def book():
 #    """Book a flight."""
 #
 #    # Get form information.
@@ -99,15 +127,15 @@ def index():
 #    return render_template("success.html")
 #
 #
-#@app.route("/flights")
-#def flights():
+# @app.route("/flights")
+# def flights():
 #    """Lists all flights."""
 #    flights = db.execute("SELECT * FROM flights").fetchall()
 #    return render_template("flights.html", flights=flights)
 #
 #
-#@app.route("/flights/<int:flight_id>")
-#def flight(flight_id):
+# @app.route("/flights/<int:flight_id>")
+# def flight(flight_id):
 #    """Lists details about a single flight."""
 #
 #    # Make sure flight exists.
@@ -121,16 +149,16 @@ def index():
 #    return render_template("flight.html", flight=flight, passengers=passengers)
 #
 #
-#votes = {"yes": 0, "no": 0, "maybe": 0}
+# votes = {"yes": 0, "no": 0, "maybe": 0}
 #
 #
-#@app.route("/testsockets")
-#def testsockets():
+# @app.route("/testsockets")
+# def testsockets():
 #    return render_template("testsockets.html", votes=votes)
 #
 #
-#@socketio.on("submit vote")
-#def vote(data):
+# @socketio.on("submit vote")
+# def vote(data):
 #    selection = data["selection"]
 #    votes[selection] += 1
 #    emit("vote totals", votes, broadcast=True)
